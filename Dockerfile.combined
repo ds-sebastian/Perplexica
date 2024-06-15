@@ -1,0 +1,48 @@
+# Base Stage for building both backend and frontend
+FROM node:18-alpine AS builder
+
+WORKDIR /home/perplexica
+
+# Copy shared files
+COPY src /home/perplexica/src
+COPY tsconfig.json /home/perplexica/
+COPY package.json /home/perplexica/
+COPY yarn.lock /home/perplexica/
+
+# Install dependencies
+RUN yarn install
+
+# Backend build
+RUN yarn run build
+
+# Frontend build
+COPY ui /home/perplexica/ui
+# Not working??
+ENV NEXT_PUBLIC_WS_URL=ws://0.0.0.0:3002 
+ENV NEXT_PUBLIC_API_URL=http://0.0.0.0:3002/api
+RUN cd ui && yarn install && yarn build
+
+# Final Stage
+FROM node:18-alpine
+
+WORKDIR /home/perplexica
+
+# Copy build outputs
+COPY --from=builder /home/perplexica /home/perplexica
+
+# Copy the entrypoint script
+COPY entrypoint.sh /home/perplexica/entrypoint.sh
+RUN chmod +x /home/perplexica/entrypoint.sh
+
+# Expose necessary frontend port
+EXPOSE 3000
+
+# Environment variables for backend configuration
+ENV SIMILARITY_MEASURE="cosine"
+ENV OPENAI=""
+ENV GROQ=""
+ENV SEARXNG_API_URL=""
+ENV OLLAMA_API_URL=""
+
+# Set the entrypoint
+ENTRYPOINT ["/home/perplexica/entrypoint.sh"]
