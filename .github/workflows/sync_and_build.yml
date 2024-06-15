@@ -13,9 +13,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          ref: main
-          fetch-depth: 0 # Fetch all history for all tags and branches
-
+          ref: master # Checkout the master branch
+          
       - name: Set up Git
         run: |
           git config --global user.name 'github-actions[bot]'
@@ -59,4 +58,4 @@ jobs:
         run: docker push ghcr.io/ds-sebastian/perplexica:latest
           
       - name: Push changes
-        run: git push origin main
+        run: git push origin master
