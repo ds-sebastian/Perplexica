@@ -33,22 +33,29 @@ jobs:
         run: git fetch upstream refs/tags/${{ steps.get_latest_release.outputs.tag }}
 
       - name: Merge upstream latest release
-        run: git merge --allow-unrelated-histories --no-commit --strategy=ours upstream/${{ steps.get_latest_release.outputs.tag }}
-      
+        run: |
+          git merge --strategy=ours --no-commit upstream/${{ steps.get_latest_release.outputs.tag }} || true
+
       - name: Restore added files
         run: git restore --source=HEAD@{1} -- Dockerfile.combined entrypoint.sh
 
       - name: Commit changes
         run: |
-          git commit -m "Sync with latest release from upstream"
+          git add -A
+          git commit -m "Sync with latest release from upstream - ${{ steps.get_latest_release.outputs.tag }}"
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v4
+      - name: Build Docker image
+        run: docker build -t ghcr.io/ds-sebastian/perplexica:latest -f Dockerfile.combined .
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
         with:
-          context: .
-          file: Dockerfile.combined
-          push: true
-          tags: ghcr.io/ds-sebastian/perplexica:latest
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Docker image
+        run: docker push ghcr.io/ds-sebastian/perplexica:latest
           
       - name: Push changes
         run: git push origin main
