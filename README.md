@@ -1,3 +1,21 @@
+This is an attempt to be able to use a single perplexica container with docker variables that get created into the `config.toml`. It's silly, but it should work lol.
+Both ports need to be exposed. First, `docker pull ghcr.io/ds-sebastian/perplexica:latest`
+```
+docker run -d -p 3000:3000 -p 3001:3001 --name perplexica \
+        -e PORT=3001 \
+        -e SIMILARITY_MEASURE="cosine" \
+        -e OPENAI="sk-........." \
+        -e SEARXNG_API_URL="https://search.domain.com" \
+        -e GROQ="gsk_.........." \
+        -e OLLAMA_API_URL="http://<IP>:<PORT>" \
+       ghcr.io/ds-sebastian/perplexica:latest
+```
+
+
+
+
+
+
 # 🚀 Perplexica - An AI-powered search engine 🔎 <!-- omit in toc -->
 
 ![preview](.assets/perplexica-screenshot.png)
