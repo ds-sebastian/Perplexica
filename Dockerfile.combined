@@ -17,9 +17,10 @@ RUN yarn run build
 
 # Frontend build
 COPY ui /home/perplexica/ui
-# Not working??
-ENV NEXT_PUBLIC_WS_URL=ws://0.0.0.0:3002 
-ENV NEXT_PUBLIC_API_URL=http://0.0.0.0:3002/api
+
+# 3002 needs to be exposed? Doesn't work within container.
+ENV NEXT_PUBLIC_WS_URL=ws://0.0.0.0:3001 
+ENV NEXT_PUBLIC_API_URL=http://0.0.0.0:3001/api
 RUN cd ui && yarn install && yarn build
 
 # Final Stage
@@ -34,8 +35,8 @@ COPY --from=builder /home/perplexica /home/perplexica
 COPY entrypoint.sh /home/perplexica/entrypoint.sh
 RUN chmod +x /home/perplexica/entrypoint.sh
 
-# Expose necessary frontend port
-EXPOSE 3000
+# Expose necessary ports
+EXPOSE 3000 3001
 
 # Environment variables for backend configuration
 ENV SIMILARITY_MEASURE="cosine"
