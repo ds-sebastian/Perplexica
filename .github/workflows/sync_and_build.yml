@@ -39,7 +39,19 @@ jobs:
       - name: Restore added files
         run: git restore --source=HEAD@{1} -- Dockerfile.combined entrypoint.sh
 
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if git diff-index --quiet HEAD --; then
+            echo "No changes to commit."
+            echo "::set-output name=changes::false"
+          else
+            echo "Changes detected."
+            echo "::set-output name=changes::true"
+          fi
+
       - name: Commit changes
+        if: steps.check_changes.outputs.changes == 'true'
         run: |
           git add -A
           git commit -m "Sync with latest release from upstream - ${{ steps.get_latest_release.outputs.tag }}"
@@ -58,4 +70,5 @@ jobs:
         run: docker push ghcr.io/ds-sebastian/perplexica:latest
           
       - name: Push changes
+        if: steps.check_changes.outputs.changes == 'true'
         run: git push origin master
